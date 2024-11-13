@@ -1,0 +1,13 @@
+header {
+    padding: 20px 300px;
+    text-align: right;
+    align-items: center;
+}
+
+#logout {
+    height: 25px;
+}
+
+#logout:hover {
+    cursor: pointer;
+}
