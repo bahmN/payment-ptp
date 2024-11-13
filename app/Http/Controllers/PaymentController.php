@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller {
     const ANTILOPAY_SIGN_VERSION = 1;
 
-
     const DIGISELLER_API_URI = 'https://digiseller.market/callback/api';
 
     public function init(Request $request) {
@@ -67,17 +66,15 @@ class PaymentController extends Controller {
                 $response = Http::withHeaders($headers)->withBody($body)->post(config('antilopay.uri') . 'create');
 
                 if (null !== $response->json('payment_url')) {
-                    Log::info('УСПЕХ. Оплата через антилопу', [$response->json()]);
+                    Log::info('УСПЕХ. Оплата через антилопу.', [$response->json()]);
 
                     return redirect()->to($response->json('payment_url'));
                 }
-                Log::info('Ошибка оплаты антилопа', [$response->json()]);
+                Log::info('ОШИБКА. Оплата через антилопу.', [$response->json()]);
 
                 // если нет ссылки на оплату, то вернем код ошибки и описание
                 return response()->json($response->json());
             } else {
-                Log::info('Переходим в селлергеймс');
-
                 return view('sellergames', ['request' => $request->all()]);
             }
         } else {
@@ -112,13 +109,14 @@ class PaymentController extends Controller {
             ];
 
             $response = Http::asForm()->get(self::DIGISELLER_API_URI, $body);
-            Log::info('AntilopaCallback', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
+            Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
 
             if ($response->body() == 'Success') {
                 Order::where('invoice_id', $request->order_id)
                     ->update([
                         'status' => 'P',
-                        'customer_ip' => $request->customer_ip
+                        'customer_ip' => $request->customer_ip,
+                        'operation_id' => $request->payment_id
                     ]);
             }
         }
@@ -128,9 +126,9 @@ class PaymentController extends Controller {
         if ($request->has('invoice_id', 'seller_id', 'amount')) {
             $order = Order::where('invoice_id', $request->invoice_id)->first();
 
-            $status = $order->status == 'N' ? 'wait' : 'paid';
-
             if (isset($order)) {
+                $status = $order->status == 'N' ? 'wait' : 'paid';
+
                 $signData = [
                     'invoice_id' => $request->invoice_id,
                     'status' => $status,
