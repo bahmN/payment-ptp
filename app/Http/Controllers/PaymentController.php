@@ -84,6 +84,13 @@ class PaymentController extends Controller {
 
     public function antilopayCallback(Request $request) {
         if (isset($request->status) && $request->status == 'SUCCESS') {
+            Order::where('invoice_id', $request->order_id)
+                ->update([
+                    'status' => 'P',
+                    'customer_ip' => $request->customer_ip,
+                    'operation_id' => $request->payment_id
+                ]);
+
             $signData = [
                 'invoice_id' => $request->order_id,
                 'amount' =>  number_format($request->amount, 2, '.', ''),
@@ -110,24 +117,20 @@ class PaymentController extends Controller {
 
             $response = Http::asForm()->get(self::DIGISELLER_API_URI, $body);
             Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
-
-            if ($response->body() == 'Success') {
-                Order::where('invoice_id', $request->order_id)
-                    ->update([
-                        'status' => 'P',
-                        'customer_ip' => $request->customer_ip,
-                        'operation_id' => $request->payment_id
-                    ]);
-            }
         }
     }
 
     public function digisellerCallback(Request $request) {
         if ($request->has('invoice_id', 'seller_id', 'amount')) {
+
+            Log::info('Запрос на подтверждение оплаты от Дигги.', [$request->all()]);
+
             $order = Order::where('invoice_id', $request->invoice_id)->first();
 
             if (isset($order)) {
                 $status = $order->status == 'N' ? 'wait' : 'paid';
+
+                // $status = 'paid';
 
                 $signData = [
                     'invoice_id' => $request->invoice_id,
@@ -153,6 +156,8 @@ class PaymentController extends Controller {
                     'signature' => strtoupper($signature),
                     'error' => ''
                 ];
+
+                Log::info('Ответ для дигги. Подтверждаем оплату.', [$body]);
 
                 return response()->json($body);
             } else {
