@@ -10,15 +10,26 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller {
     const ANTILOPAY_SIGN_VERSION = 1;
 
-    const DIGISELLER_API_URI = 'https://digiseller.market/callback/api';
+    const DIGISELLER_API_CALLBACK_URI = 'https://digiseller.market/callback/api';
+
+    const CURRENCY_WM = [
+        'WMZ' => 'USD',
+        'WMR' => 'RUB',
+        'WME' => 'EUR'
+    ];
 
     public function init(Request $request) {
         if ($request->has('invoice_id', 'amount', 'currency', 'description', 'lang', 'email', 'payment_id', 'return_url')) {
             if (isset(config('antilopay.payment_id')[$request->payment_id])) {
+
+                if (!$this->checkAmount($request)) {
+                    return response()->json('Неверная сумма или валюта заказа', 403);
+                }
+
                 Order::firstOrCreate(
                     ['invoice_id' => $request->invoice_id],
                     [
-                        'amount' => $request->amount,
+                        'amount' => round($request->amount, 2),
                         'currency' => $request->currency,
                         'description' => $request->description,
                         'lang' => $request->lang,
@@ -32,9 +43,9 @@ class PaymentController extends Controller {
 
                 $body = [
                     'project_identificator' => config('antilopay.id'),
-                    'amount' =>  round($request->amount, 0),
+                    'amount' =>  round($request->amount, 2),
                     'order_id' => $request->invoice_id,
-                    'currency' => 'RUB',
+                    'currency' => $request->currency,
                     'product_name' => $request->description,
                     'product_type' => 'goods',
                     'product_type' => 1,
@@ -72,19 +83,30 @@ class PaymentController extends Controller {
                 }
                 Log::info('ОШИБКА. Оплата через антилопу.', [$response->json()]);
 
-                // если нет ссылки на оплату, то вернем код ошибки и описание
                 return response()->json($response->json());
             } else {
                 return view('sellergames', ['request' => $request->all()]);
             }
         } else {
-            return response()->json(['Bad request'], 400);
+            return response()->json(['Bad request'], 200);
         }
     }
 
     public function antilopayCallback(Request $request) {
         if (isset($request->status) && $request->status == 'SUCCESS') {
+            $sign = $request->header('X-Apay-Callback');
+            $publicKey = "-----BEGIN PUBLIC KEY-----\n" . config('antilopay.callback_key') . "\n-----END PUBLIC KEY-----";
+            $jsonData = file_get_contents('php://input');
+            $rawSign = base64_decode($sign);
+
+            if (openssl_verify($jsonData, $rawSign, $publicKey, OPENSSL_ALGO_SHA256) != 1) {
+                Log::error('Antilopay Callback. НЕПРАВИЛЬНАЯ СИГНАТУРА', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all()]);
+
+                return response()->json(['Wrong signature'], 403);
+            };
+
             Order::where('invoice_id', $request->order_id)
+                ->where('amount', $request->original_amount)
                 ->update([
                     'status' => 'P',
                     'customer_ip' => $request->customer_ip,
@@ -105,7 +127,7 @@ class PaymentController extends Controller {
                 $stringToSign .= "$key:$value;";
             }
 
-            $signature = hash_hmac('SHA256', $stringToSign, config('digiseller.key'), false);
+            $signature = hash_hmac('SHA256', $stringToSign, config('digiseller.callback_key'), false);
 
             $body = [
                 'invoice_id' => $request->order_id,
@@ -115,7 +137,7 @@ class PaymentController extends Controller {
                 'signature' => strtoupper($signature),
             ];
 
-            $response = Http::asForm()->get(self::DIGISELLER_API_URI, $body);
+            $response = Http::asForm()->get(self::DIGISELLER_API_CALLBACK_URI, $body);
             Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
         }
     }
@@ -129,8 +151,6 @@ class PaymentController extends Controller {
 
             if (isset($order)) {
                 $status = $order->status == 'N' ? 'wait' : 'paid';
-
-                // $status = 'paid';
 
                 $signData = [
                     'invoice_id' => $request->invoice_id,
@@ -146,7 +166,7 @@ class PaymentController extends Controller {
                     $stringToSign .= "$key:$value;";
                 }
 
-                $signature = hash_hmac('SHA256', $stringToSign, config('digiseller.key'), false);
+                $signature = hash_hmac('SHA256', $stringToSign, config('digiseller.callback_key'), false);
 
                 $body = [
                     'invoice_id' => $request->invoice_id,
@@ -166,5 +186,41 @@ class PaymentController extends Controller {
         } else {
             return response()->json(['Bad request'], 400);
         }
+    }
+
+    protected function checkAmount($request) {
+        $timestamp = time();
+        $token = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->post('https://api.digiseller.com/api/apilogin', [
+            'seller_id' => config('digiseller.seller_id'),
+            'timestamp' => $timestamp,
+            'sign' =>  hash('sha256', config('digiseller.request_key') . $timestamp)
+        ]);
+
+        $order = Http::get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token['token']);
+
+        if (
+            !isset($order['content']['amount']) ||
+            $order['content']['amount'] != $request->amount ||
+            !isset(self::CURRENCY_WM[$order['content']['currency_type']]) ||
+            self::CURRENCY_WM[$order['content']['currency_type']] != $request->currency
+        ) {
+            $orderAmount = $order['content']['amount'] ?? 'nothing';
+            $orderCurrency = $order['content']['currency_type'] ?? 'nothing';
+
+            Log::error('Инциализация платежа. СУММА или Валюта НЕ РАВНЫ', ['Сумма и валюта заказа' => [
+                $orderAmount,
+                $orderCurrency
+            ], 'Сумма и валюта переданная в запросе' => [
+                $request->amount,
+                $request->currency
+            ]]);
+
+            return false;
+        }
+
+        return true;
     }
 }
