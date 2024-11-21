@@ -9,7 +9,6 @@
 </head>
 
 <body>
-
     <form id="seller.games_form" action="https://seller.games/payment/3dc63474-e4df-48b7-80cd-b566f9b43066/"
         method="POST">
         <input type="hidden" name="invoice_id" value="{{ $request['invoice_id'] }}">
@@ -17,9 +16,10 @@
         <input type="hidden" name="currency" value="{{ $request['currency'] }}">
         <input type="hidden" name="description" value="{{ $request['description'] }}">
         <input type="hidden" name="lang" value="{{ $request['lang'] }}">
-        <input type="hidden" name="payment_id" value="{{ $request['payment_id'] }}">
-        <input type="hidden" name="return_url" value="{{ $request['return_url'] }}">
         <input type="hidden" name="email" value="{{ $request['email'] }}">
+        <input type="hidden" name="payment_id" value="{{ $request['payment_id'] }}">
+        <input type="hidden" name="return_url" value="{{ urldecode($request['return_url']) }}">
+        <input type="hidden" name="signature" value="{{ $request['signature'] }}">
     </form>
 
     <script type="text/javascript">
