@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\Token;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -189,17 +190,9 @@ class PaymentController extends Controller {
     }
 
     protected function checkAmount($request) {
-        $timestamp = time();
-        $token = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
-        ])->post('https://api.digiseller.com/api/apilogin', [
-            'seller_id' => config('digiseller.seller_id'),
-            'timestamp' => $timestamp,
-            'sign' =>  hash('sha256', config('digiseller.request_key') . $timestamp)
-        ]);
+        $token = new Token();
 
-        $order = Http::get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token['token']);
+        $order = Http::get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token->get());
 
         if (
             !isset($order['content']['amount']) ||
