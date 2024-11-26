@@ -190,7 +190,7 @@ class PaymentController extends Controller {
     }
 
     protected function checkAmount($request) {
-        $token = new Token();
+        $token = new Token(0);
 
         $order = Http::get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token->get());
 

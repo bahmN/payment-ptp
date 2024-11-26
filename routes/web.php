@@ -19,6 +19,8 @@ Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], fun
     Route::get('/digisellerCallback', [PaymentController::class, 'digisellerCallback']);
 });
 
-Route::any('/bot/webhook/options', [NotificationController::class, 'saveNotifyOptions']);
+Route::any('/bot/webhook/options', [NotificationController::class, 'saveNotificationBotWebhook']);
+
+Route::any('/test', [NotificationController::class, 'test']);
 
 require __DIR__ . '/auth.php';

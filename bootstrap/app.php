@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '/payments/gateway/init',
             '/payments/gateway/antilopayCallback',
             '/payments/gateway/digisellerCallback',
+            '/bot/webhook/options',
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
