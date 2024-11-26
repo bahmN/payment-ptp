@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Http;
 
 class Token {
     private $token;
+    private $digisellerKey;
 
-    public function __construct() {
-        $this->token = ModelsToken::first();
+    public function __construct($is_notify) {
+        $this->digisellerKey = $is_notify ? config('digiseller.request_notify_key') : config('digiseller.request_key');
+        $this->token = ModelsToken::where('is_notify', $is_notify)->first();
     }
 
     protected function checkRelevance() {
@@ -23,7 +25,7 @@ class Token {
             ])->post('https://api.digiseller.com/api/apilogin', [
                 'seller_id' => config('digiseller.seller_id'),
                 'timestamp' => $timestamp,
-                'sign' =>  hash('sha256', config('digiseller.request_key') . $timestamp)
+                'sign' =>  hash('sha256', $this->digisellerKey . $timestamp)
             ]);
 
             $token->id = $response['token'];
