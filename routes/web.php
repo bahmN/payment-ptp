@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,5 +18,7 @@ Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], fun
     Route::post('/antilopayCallback', [PaymentController::class, 'antilopayCallback']);
     Route::get('/digisellerCallback', [PaymentController::class, 'digisellerCallback']);
 });
+
+Route::any('/bot/webhook/options', [NotificationController::class, 'saveNotifyOptions']);
 
 require __DIR__ . '/auth.php';
