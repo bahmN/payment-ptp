@@ -9,10 +9,10 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->string('invoice_id', 11)->primary();
-            $table->string('email');
-            $table->boolean('is_options')->default(0);
+        Schema::create('options_notifiaction', function (Blueprint $table) {
+            $table->id();
+            $table->longText('message');
+            $table->timestamp('time_of_sending');
         });
     }
 
@@ -20,6 +20,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('options_notifiaction');
     }
 };
