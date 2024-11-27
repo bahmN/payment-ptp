@@ -16,6 +16,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/message', [AccountController::class, 'message'])->name('message');
     Route::post('/saveOptions', [AccountController::class, 'saveOptionsNotification'])->name('saveOptions');
+    Route::post('/saveBlacklist', [AccountController::class, 'saveBlacklist'])->name('saveBlacklist');
+    Route::post('/deleteBlacklist', [AccountController::class, 'deleteBlacklist'])->name('deleteBlacklist');
 });
 
 Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], function () {

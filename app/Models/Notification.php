@@ -17,7 +17,6 @@ class Notification extends Model {
         'invoice_id',
         'email',
         'is_options',
-        'is_stopped',
         'time_of_purchase',
         'is_notificated',
     ];

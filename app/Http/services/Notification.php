@@ -21,7 +21,6 @@ class Notification {
 
         if (!empty($optionsNotify)) {
             $notification = ModelsNotification::where('invoice_id', $id_i)
-                ->where('is_stopped', false)
                 ->where('is_notificated', false)
                 ->first();
 

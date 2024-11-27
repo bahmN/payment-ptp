@@ -218,7 +218,8 @@ input::-webkit-inner-spin-button {
     box-shadow: -7px 7px 15px var(--shadows);
 }
 
-textarea {
+textarea,
+.black_list__input {
     width: 100%;
     box-sizing: border-box;
     height: 150px;
@@ -232,6 +233,10 @@ textarea {
     font-weight: 500;
     text-align: justify;
     resize: none;
+}
+
+.black_list__input {
+    height: 100%;
 }
 
 .messages_time {
@@ -258,7 +263,8 @@ input:focus-visible {
     border-radius: 7px;
 }
 
-textarea:focus-visible {
+textarea:focus-visible,
+.black_list__input:focus-visible {
     outline: 2px solid var(--blue);
     border-radius: 20px;
 }
@@ -354,4 +360,10 @@ textarea:focus-visible {
     font-weight: 900;
     color: var(--blue);
     text-transform: uppercase;
+}
+
+.black_list {
+    width: 40%;
+    display: flex;
+    margin: 20px 200px;
 }
