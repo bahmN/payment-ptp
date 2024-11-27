@@ -1,7 +1,35 @@
 header {
-    padding: 20px 300px;
-    text-align: right;
+    margin: 20px 200px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(212, 70, 96, 0.5) 0%, rgba(136, 222, 219, 0.4963235294117647) 100%);
+    border-radius: 20px;
+    box-shadow: -7px 7px 15px var(--shadows);
+}
+
+.tabs {
+    display: flex;
     align-items: center;
+    gap: 30px;
+}
+
+.tabs a {
+    padding: 5px 10px;
+
+    font-weight: 900;
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: transform 0.5s ease;
+}
+
+.tabs a:hover {
+    padding: 5px 10px;
+    color: white;
+    background-color: var(--blue);
+    border-radius: 10px;
+    transform: scale(1.1);
 }
 
 #logout {

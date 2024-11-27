@@ -13,6 +13,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'index'])->name('account');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/message', [AccountController::class, 'message'])->name('message');
+    Route::post('/saveOptions', [AccountController::class, 'saveOptionsNotification'])->name('saveOptions');
+});
+
 Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], function () {
     Route::post('/init', [PaymentController::class, 'init']);
     Route::post('/antilopayCallback', [PaymentController::class, 'antilopayCallback']);

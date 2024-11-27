@@ -19,7 +19,6 @@
         'N' => 'Ожидает оплаты',
     ];
 @endphp
-
 <section class="all_data">
     <div class="title_table">
         <h3 id="invoiceC">Номер заказа\<br>Номер операции\<br>Дата заказа</h3>

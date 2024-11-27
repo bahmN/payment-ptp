@@ -20,6 +20,14 @@ body {
     background-color: var(--light);
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0;
+    /* <-- Apparently some margin are still there even though it's hidden */
+}
+
 .all_data {
     display: flex;
     flex-direction: column;
@@ -172,19 +180,178 @@ body {
     height: 100%;
     align-items: center;
     justify-content: center;
-
     border-radius: 30px;
     background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(212, 70, 96, 0.5) 0%, rgba(136, 222, 219, 0.4963235294117647) 100%);
-
     box-shadow: -7px 7px 15px var(--shadows);
-
     text-decoration: none;
     font-size: 24px;
     font-weight: 900;
-
     color: black;
 }
 
 .paginator_next {
     background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(136, 222, 219, 0.4963235294117647) 0%, rgba(212, 70, 96, 0.5) 96%);
+}
+
+.messages {
+    display: flex;
+    margin: 0 200px;
+    gap: 20px;
+}
+
+.messages_general,
+.messages_options {
+    width: 100%;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: var(--light-light);
+    border-radius: 30px;
+    box-shadow: -15px 15px 15px var(--shadows);
+}
+
+.messages_label {
+    padding: 20px;
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(212, 70, 96, 0.5) 0%, rgba(136, 222, 219, 0.4963235294117647) 100%);
+    border-radius: 20px;
+    box-shadow: -7px 7px 15px var(--shadows);
+}
+
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 150px;
+    padding: 20px;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: -7px 7px 15px var(--shadows);
+    border: none;
+    font-family: "Jura", sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: justify;
+    resize: none;
+}
+
+.messages_time {
+    display: flex;
+    gap: 5px;
+    align-items: end;
+}
+
+.messages_time input {
+    width: 50px;
+    padding: 5px;
+    border: none;
+    border-radius: 10px;
+    font-family: "Jura", sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    box-shadow: -7px 7px 15px var(--shadows);
+    resize: none;
+
+}
+
+input:focus-visible {
+    outline: 2px solid var(--blue);
+    border-radius: 7px;
+}
+
+textarea:focus-visible {
+    outline: 2px solid var(--blue);
+    border-radius: 20px;
+}
+
+.label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.label-text {
+    margin-left: 8px;
+}
+
+.toggle {
+    isolation: isolate;
+    position: relative;
+    height: 24px;
+    width: 48px;
+    border-radius: 15px;
+    background: var(--shadows);
+    overflow: hidden;
+    box-shadow: -7px 7px 15px var(--shadows);
+}
+
+.toggle:hover {
+    cursor: pointer;
+}
+
+.toggle-inner {
+    z-index: 2;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    height: 22px;
+    width: 46px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.active-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 200%;
+    background: linear-gradient(90deg, rgba(212, 70, 96, 0.5) 0%, rgba(136, 222, 219, 0.4963235294117647) 100%);
+    transform: translate3d(-100%, 0, 0);
+    transition: transform 0.05s linear 0.17s;
+}
+
+.toggle-state {
+    display: none;
+}
+
+.indicator {
+    height: 100%;
+    width: 200%;
+    background: var(--light);
+    border-radius: 13px;
+    transform: translate3d(-75%, 0, 0);
+    transition: transform 0.35s cubic-bezier(0.85, 0.05, 0.18, 1.35);
+}
+
+.toggle-state:checked~.active-bg {
+    transform: translate3d(-50%, 0, 0);
+}
+
+.toggle-state:checked~.toggle-inner .indicator {
+    transform: translate3d(25%, 0, 0);
+}
+
+.message_submit {
+    width: 100%;
+    padding: 5px;
+    border: none;
+    border-radius: 10px;
+    background-image: linear-gradient(90deg, rgba(212, 70, 96, 0.5) 0%, rgba(136, 222, 219, 0.4963235294117647) 100%);
+    box-shadow: -7px 7px 15px var(--shadows);
+    text-transform: uppercase;
+    font-family: "Jura", sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.message_submit:hover {
+    cursor: pointer;
+}
+
+.alert-success {
+    padding: 20px 200px;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--blue);
+    text-transform: uppercase;
 }
