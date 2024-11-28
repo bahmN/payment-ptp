@@ -15,7 +15,8 @@ Schedule::call(function () {
     if (isset($optNotification->is_active) && $optNotification->is_active == true) {
         Notification::where('is_notificated', false)->chunk(300, function (Collection $notificationList) use ($optNotification, $fbChecker) {
             foreach ($notificationList as $notification) {
-                //Проверим: есть отзыв в заказе или нет. Если false, то отсылаем сообщение, иначе пропускаем.
+                sleep(2);
+                // Проверим: есть отзыв в заказе или нет. Если false, то отсылаем сообщение, иначе пропускаем.
                 if ($fbChecker->check($notification->invoice_id) === false) {
                     $timeNotification = $notification->time_of_purchase + $optNotification->time_of_sending;
 
@@ -31,4 +32,4 @@ Schedule::call(function () {
             }
         });
     }
-})->everyTenSeconds();
+})->everyThirtySeconds();

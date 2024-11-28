@@ -12,7 +12,7 @@
         <textarea type="text" name="message">{{ $optionsNotification[1]['message'] }}</textarea>
 
 
-        <h3>&nbsp&nbsp&nbsp&nbspТекст сообщения:</h3>
+        <h3>&nbsp&nbsp&nbsp&nbspАдрес картинки:</h3>
 
 
         <input class="uri_picture" type="text" name="uri_picture" placeholder="Адрес фотографии.."
@@ -52,6 +52,7 @@
         <textarea type="number" name="message">{{ $optionsNotification[0]['message'] }}</textarea>
 
         <div style="height: 30px"></div>
+        <div style="height: 90px"></div>
 
         <label class="label">
             <div class="toggle">
