@@ -19,9 +19,8 @@ class Notification {
         $optionsNotify = OptionNotification::where('is_options', $is_options)
             ->where('is_active', true)->first();
 
-        if ($optionsNotify) {
+        if ($optionsNotify->is_active == true) {
             $notification = ModelsNotification::where('invoice_id', $id_i)
-                ->where('is_notificated', false)
                 ->first();
 
             if ($notification) {
