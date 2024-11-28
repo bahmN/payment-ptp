@@ -25,6 +25,8 @@ Schedule::call(function () {
                     }
                 }
 
+                $notification->is_notificated = true;
+                $notification->save();
                 continue;
             }
         });
