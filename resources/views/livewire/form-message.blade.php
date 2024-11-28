@@ -11,6 +11,13 @@
         <h3>&nbsp&nbsp&nbsp&nbspТекст сообщения:</h3>
         <textarea type="text" name="message">{{ $optionsNotification[1]['message'] }}</textarea>
 
+
+        <h3>&nbsp&nbsp&nbsp&nbspТекст сообщения:</h3>
+
+
+        <input class="uri_picture" type="text" name="uri_picture" placeholder="Адрес фотографии.."
+            value="{{ $optionsNotification[1]['uri_picture'] }}">
+
         <div class="messages_time">
             <h3>Отправлять сообщения через</h3>
             <input type="number" name="time_of_sending" value="{{ $optionsNotification[1]['time_of_sending'] }}">

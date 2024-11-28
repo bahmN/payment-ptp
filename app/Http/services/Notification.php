@@ -19,17 +19,38 @@ class Notification {
         $optionsNotify = OptionNotification::where('is_options', $is_options)
             ->where('is_active', true)->first();
 
-        if ($optionsNotify->is_active == true) {
+        if (isset($optionsNotify->is_active) && $optionsNotify->is_active) {
             $notification = ModelsNotification::where('invoice_id', $id_i)
                 ->first();
 
             if ($notification) {
-                $response = Http::withHeaders([
-                    'Accept' => 'application/json'
-                ])
-                    ->withBody(json_encode(['message' => $optionsNotify->message], JSON_UNESCAPED_UNICODE))
-                    ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
+                $body = [
+                    'message' => $optionsNotify->message
+                ];
 
+                if (isset($optionsNotify->uri_picture)) {
+                    $uploadPict = Http::withHeaders([
+                        'Accept' => 'application/json'
+                    ])
+                        ->attach('photo', file_get_contents($optionsNotify->uri_picture), 'feedback.png',  ['Content-Type' => 'image/jpeg'])
+                        ->post("https://api.digiseller.com/api/debates/v2/upload-preview?token={$this->token}&lang=ru-RU");
+
+                    if ($uploadPict->ok()) {
+                        $body['files'] = [
+                            [
+                                'newid' => $uploadPict->json('files')[0]['newid'],
+                                'name' => $uploadPict->json('files')[0]['name'],
+                                'type' => $uploadPict->json('files')[0]['type']
+                            ]
+                        ];
+                    }
+                }
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                ])
+                    ->withBody(json_encode($body, JSON_UNESCAPED_UNICODE))
+                    ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
                 if ($response->ok()) {
                     if (!$is_options) {
                         $notification->is_notificated = true;

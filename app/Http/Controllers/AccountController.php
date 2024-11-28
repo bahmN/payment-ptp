@@ -22,7 +22,8 @@ class AccountController extends Controller {
         OptionNotification::where('id', $request->id)->update([
             'message' => $request->message,
             'time_of_sending' => $request->time_of_sending ?? 1,
-            'is_active' => $request->is_active ?? false
+            'is_active' => $request->is_active ?? false,
+            'uri_picture' => $request->uri_picture ?? null
         ]);
 
         return back()->with('status', true);

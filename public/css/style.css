@@ -219,7 +219,8 @@ input::-webkit-inner-spin-button {
 }
 
 textarea,
-.black_list__input {
+.black_list__input,
+.uri_picture {
     width: 100%;
     box-sizing: border-box;
     height: 150px;
@@ -233,6 +234,10 @@ textarea,
     font-weight: 500;
     text-align: justify;
     resize: none;
+}
+
+.uri_picture {
+    height: 10%;
 }
 
 .black_list__input {

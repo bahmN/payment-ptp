@@ -13,6 +13,7 @@ class OptionNotification extends Model {
         'message',
         'time_of_sending',
         'is_active',
-        'is_options'
+        'is_options',
+        'uri_picture'
     ];
 }
