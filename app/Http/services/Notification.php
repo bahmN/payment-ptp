@@ -51,12 +51,8 @@ class Notification {
                 ])
                     ->withBody(json_encode($body, JSON_UNESCAPED_UNICODE))
                     ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
-                if ($response->ok()) {
-                    if (!$is_options) {
-                        $notification->is_notificated = true;
-                        $notification->save();
-                    }
 
+                if ($response->ok()) {
                     Log::error('Отправка уведомления. УСПЕХ.');
 
                     return 'ok';

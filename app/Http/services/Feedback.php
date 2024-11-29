@@ -2,7 +2,9 @@
 
 namespace App\Http\Services;
 
+use App\Models\Notification;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Feedback {
     private $token;
@@ -21,7 +23,11 @@ class Feedback {
             ]
         )->get('{+endpoint}/{invoice_id}?token={token}');
 
-        if ($response->json('content')['feedback']) {
+        Log::error('Проверка отзыва.', [$response->json()]);
+        if ($response->json('content')['feedback'] != null) {
+            $notification = Notification::where('invoice_id', $invoice_id)
+                ->first();
+            $notification->delete();
             return true;
         }
 

@@ -18,6 +18,7 @@ class NotificationController extends Controller {
                         'email' => $request->email,
                         'is_options' => $request->options,
                         'time_of_purchase' => $request->time,
+                        'is_notificated' => false
                     ]
                 );
 
