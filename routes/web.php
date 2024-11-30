@@ -3,9 +3,8 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Services\Notification;
+use App\Http\Services\PaymentGateways\Alikassa;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return response()->json(['service' => 'payment-ptp']);
@@ -24,8 +23,15 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], function () {
     Route::post('/init', [PaymentController::class, 'init']);
-    Route::post('/antilopayCallback', [PaymentController::class, 'antilopayCallback']);
     Route::get('/digisellerCallback', [PaymentController::class, 'digisellerCallback']);
+
+    Route::group(['prefix' => 'antilopay', 'as' => 'antilopay.'], function () {
+        Route::post('/callback', [PaymentController::class, 'antilopayCallback']);
+    });
+
+    Route::group(['prefix' => 'alikassa', 'as' => 'alikassa.'], function () {
+        Route::post('/callback', [Alikassa::class, ['callback']]);
+    });
 });
 
 Route::post('/bot/webhook/options', [NotificationController::class, 'saveNotificationBotWebhook']);

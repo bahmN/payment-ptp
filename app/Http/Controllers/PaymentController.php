@@ -141,6 +141,8 @@ class PaymentController extends Controller {
             $response = Http::asForm()->get(self::DIGISELLER_API_CALLBACK_URI, $body);
             Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
         }
+
+        return response()->json('Bad request', 400);
     }
 
     public function digisellerCallback(Request $request) {
