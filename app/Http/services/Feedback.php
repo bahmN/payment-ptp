@@ -23,7 +23,6 @@ class Feedback {
             ]
         )->get('{+endpoint}/{invoice_id}?token={token}');
 
-        Log::error('Проверка отзыва.', [$response->json()]);
         if ($response->json('content')['feedback'] != null) {
             $notification = Notification::where('invoice_id', $invoice_id)
                 ->first();

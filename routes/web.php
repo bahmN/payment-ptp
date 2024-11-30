@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Services\Notification;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

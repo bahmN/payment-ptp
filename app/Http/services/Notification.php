@@ -20,47 +20,70 @@ class Notification {
             ->where('is_active', true)->first();
 
         if (isset($optionsNotify->is_active) && $optionsNotify->is_active) {
-            $notification = ModelsNotification::where('invoice_id', $id_i)
-                ->first();
 
-            if ($notification) {
-                $body = [
-                    'message' => $optionsNotify->message
-                ];
+            $body = [
+                'message' => $optionsNotify->message
+            ];
 
-                if (isset($optionsNotify->uri_picture)) {
-                    $uploadPict = Http::withHeaders([
-                        'Accept' => 'application/json'
-                    ])
-                        ->attach('photo', file_get_contents($optionsNotify->uri_picture), 'feedback.png',  ['Content-Type' => 'image/jpeg'])
-                        ->post("https://api.digiseller.com/api/debates/v2/upload-preview?token={$this->token}&lang=ru-RU");
-
-                    if ($uploadPict->ok()) {
-                        $body['files'] = [
-                            [
-                                'newid' => $uploadPict->json('files')[0]['newid'],
-                                'name' => $uploadPict->json('files')[0]['name'],
-                                'type' => $uploadPict->json('files')[0]['type']
-                            ]
-                        ];
-                    }
-                }
-
-                $response = Http::withHeaders([
-                    'Accept' => 'application/json',
+            if (isset($optionsNotify->uri_picture)) {
+                $uploadPict = Http::withHeaders([
+                    'Accept' => 'application/json'
                 ])
-                    ->withBody(json_encode($body, JSON_UNESCAPED_UNICODE))
-                    ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
+                    ->attach('photo', file_get_contents($optionsNotify->uri_picture), 'feedback.png',  ['Content-Type' => 'image/jpeg'])
+                    ->post("https://api.digiseller.com/api/debates/v2/upload-preview?token={$this->token}&lang=ru-RU");
 
-                if ($response->ok()) {
-                    Log::error('Отправка уведомления. УСПЕХ.');
-
-                    return 'ok';
-                } else {
-                    return $response->json();
-                    Log::error('Отправка уведомления. ОШИБКА.', ['Response: ' => $response->json()]);
+                if ($uploadPict->ok()) {
+                    $body['files'] = [
+                        [
+                            'newid' => $uploadPict->json('files')[0]['newid'],
+                            'name' => $uploadPict->json('files')[0]['name'],
+                            'type' => $uploadPict->json('files')[0]['type']
+                        ]
+                    ];
                 }
             }
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+            ])
+                ->withBody(json_encode($body, JSON_UNESCAPED_UNICODE))
+                ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
+
+            if ($response->ok()) {
+                Log::error('Отправка уведомления. УСПЕХ.');
+
+                return 'ok';
+            } else {
+                return $response->json();
+                Log::error('Отправка уведомления. ОШИБКА.', ['Response: ' => $response->json()]);
+            }
         }
+    }
+
+    public function checkSeenMessage($id_i) {
+        $response = Http::withHeader('Accept', 'application/json')->withUrlParameters(
+            [
+                'endpoint' => 'https://api.digiseller.com/api/debates/v2',
+                'id_i' => $id_i,
+                'token' => $this->token
+            ]
+        )->get('{+endpoint}?token={token}&id_i={id_i}');
+
+
+        if (empty($response->json())) {
+            return true;
+        }
+
+        $message = $response->json();
+
+        if (isset($message['buyer']) && $message['buyer']) {
+            if (isset($message['date_seen']) && $message['date_seen']) {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
