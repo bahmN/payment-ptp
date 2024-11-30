@@ -5,6 +5,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Services\Notification;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return response()->json(['service' => 'payment-ptp']);
@@ -27,6 +28,6 @@ Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], fun
     Route::get('/digisellerCallback', [PaymentController::class, 'digisellerCallback']);
 });
 
-Route::any('/bot/webhook/options', [NotificationController::class, 'saveNotificationBotWebhook']);
+Route::post('/bot/webhook/options', [NotificationController::class, 'saveNotificationBotWebhook']);
 
 require __DIR__ . '/auth.php';
