@@ -30,7 +30,7 @@ Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], fun
     });
 
     Route::group(['prefix' => 'alikassa', 'as' => 'alikassa.'], function () {
-        Route::post('/callback', [Alikassa::class, ['callback']]);
+        Route::post('/callback', [Alikassa::class, 'callback'])->name('callback');
     });
 });
 

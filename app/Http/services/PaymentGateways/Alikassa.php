@@ -2,10 +2,75 @@
 
 namespace App\Http\Services\PaymentGateways;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 class Alikassa {
-    public function generateLink() {
+    public function paymentLink($data) {
+        $body = [
+            'amount' => round($data->amount, 1),
+            'order_id' => (string) $data->invoice_id,
+            'service' => config('alikassa.service')[$data->payment_id],
+            'desc' => 'Оплата заказа №' . $data->invoice_id,
+            'customer_ip' => $data->ip(),
+            'customer_email' => $data->email,
+            'customer_browser_user_agent' => $data->header('User-Agent'),
+            'success_redirect_url' => urldecode($data->return_url),
+            'notification_endpoint_id' => 749,
+            'notification_endpoint_url' => route('payments.gateway.alikassa.callback')
+        ];
+
+        $privateKey = openssl_pkey_get_private(
+            Storage::disk('local')->get('alikassa/payment/private.pem'),
+            Storage::disk('local')->get('alikassa/payment/password.txt'),
+        );
+
+        $body = json_encode($body, JSON_UNESCAPED_UNICODE);
+
+        openssl_sign($body, $sign, $privateKey);
+        $sign = base64_encode($sign);
+
+        $response = Http::withHeaders([
+            'Account' => config('alikassa.account_id'),
+            'Sign' => $sign
+        ])->withBody($body)->post('https://api-merchant.alikassa.com/v1/payment');
+
+        if (null !== $response->json('url')) {
+            Log::info('УСПЕХ. Оплата через Alikassa.', [$response->json()]);
+
+            return $response->json('url');
+        }
+
+        Log::info('ОШИБКА. Оплата через Alikassa.', [$response->json()]);
+
+        return response()->json($response->json());
     }
 
-    public function callback() {
+    public function callback(Request $request) {
+        Log::info('AlikassaCallback.', [$request->all()]);
+
+        $verify = openssl_verify(
+            json_encode([
+                'type' => $request->type,
+                'id' => (int) $request->id,
+                'order_id' => $request->order_id,
+                'payment_status' => $request->payment_status,
+                'amount' => $request->amount,
+                'payment_amount' => $request->payment_amount,
+                'is_partial_payment' => $request->is_partial_payment,
+                'account' => $request->account,
+                'service' => $request->service,
+                'desc' => $request->desc,
+            ]),
+            base64_decode($request->sign),
+            Storage::disk('local')->get('alikassa/notification/public.pem'),
+        );
+
+        Log::info('AlikassaCallback.', ['verify' => $verify]);
+
+        if ($verify) {
+        }
     }
 }

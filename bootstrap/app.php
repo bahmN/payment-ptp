@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             '/payments/gateway/init',
-            'payments/gateway/antilopay/callback',
+            '/payments/gateway/antilopay/callback',
+            '/payments/gateway/alikassa/callback',
             '/payments/gateway/digisellerCallback',
             '/bot/webhook/options',
 

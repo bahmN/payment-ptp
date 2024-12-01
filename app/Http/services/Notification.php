@@ -50,8 +50,6 @@ class Notification {
                 ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
 
             if ($response->ok()) {
-                Log::error('Отправка уведомления. УСПЕХ.');
-
                 return 'ok';
             } else {
                 return $response->json();
