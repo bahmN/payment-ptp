@@ -20,11 +20,10 @@ Schedule::call(function () {
                 // Проверим: есть отзыв в заказе или нет. Если false, то отсылаем сообщение, иначе пропускаем.
                 if ($fbChecker->check($notification->invoice_id) === false) {
                     $timeNotification = $notification->time_of_purchase + $optNotification->time_of_sending;
-
-                    // Проверим: есть ли сообщение от клиента, которое не прочитано нами
-                    if ($notificationService->checkSeenMessage($notification->invoice_id)) {
-                        if ($timeNotification < time()) {
-
+                    //проверим актуальность отправки времени
+                    if ($timeNotification < time()) {
+                        // Проверим: есть ли сообщение от клиента, которое не прочитано нами
+                        if ($notificationService->checkSeenMessage($notification->invoice_id)) {
                             $notificationService->sendMessage(false, $notification->invoice_id);
 
                             $notification->delete();
