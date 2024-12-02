@@ -26,22 +26,22 @@ class PaymentController extends Controller {
                 return response()->json('Неверная сумма или валюта заказа', 403);
             }
 
-            Order::firstOrCreate(
-                ['invoice_id' => $request->invoice_id],
-                [
-                    'amount' => round($request->amount, 2),
-                    'currency' => $request->currency,
-                    'description' => $request->description,
-                    'lang' => $request->lang,
-                    'email' => $request->email,
-                    'payment_id' => $request->payment_id,
-                    'return_url' => urldecode($request->return_url),
-                    'status' => 'N',
-                    'date' => date('Y-m-d H:i:s')
-                ]
-            );
-
             if (isset(config('antilopay.payment_id')[$request->payment_id])) {
+                Order::firstOrCreate(
+                    ['invoice_id' => $request->invoice_id],
+                    [
+                        'amount' => round($request->amount, 2),
+                        'currency' => $request->currency,
+                        'description' => $request->description,
+                        'lang' => $request->lang,
+                        'email' => $request->email,
+                        'payment_id' => $request->payment_id,
+                        'return_url' => urldecode($request->return_url),
+                        'status' => 'N',
+                        'date' => date('Y-m-d H:i:s')
+                    ]
+                );
+
                 $body = [
                     'project_identificator' => config('antilopay.id'),
                     'amount' =>  round($request->amount, 2),
@@ -86,6 +86,22 @@ class PaymentController extends Controller {
 
                 return response()->json($response->json());
             } elseif (isset(config('alikassa.service')[$request->payment_id])) {
+                Order::firstOrCreate(
+                    ['invoice_id' => $request->invoice_id],
+                    [
+                        'amount' => round($request->amount, 2),
+                        'currency' => $request->currency,
+                        'description' => $request->description,
+                        'lang' => $request->lang,
+                        'email' => $request->email,
+                        'payment_id' => $request->payment_id,
+                        'return_url' => urldecode($request->return_url),
+                        'status' => 'N',
+                        'date' => date('Y-m-d H:i:s'),
+                        'customer_ip' =>  $request->ip()
+                    ]
+                );
+
                 $alikassa = new Alikassa();
 
                 return redirect()->to($alikassa->paymentLink($request));
