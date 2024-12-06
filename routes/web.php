@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Services\PaymentGateways\Alikassa;
+use App\Http\Services\PaymentGateways\Antilopay;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,7 +27,7 @@ Route::group(['prefix' => '/payments/gateway', 'as' => 'payments.gateway.'], fun
     Route::get('/digisellerCallback', [PaymentController::class, 'digisellerCallback']);
 
     Route::group(['prefix' => 'antilopay', 'as' => 'antilopay.'], function () {
-        Route::post('/callback', [PaymentController::class, 'antilopayCallback']);
+        Route::post('/callback', [Antilopay::class, 'callback']);
     });
 
     Route::group(['prefix' => 'alikassa', 'as' => 'alikassa.'], function () {

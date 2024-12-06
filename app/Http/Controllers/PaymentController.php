@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\PaymentGateways\Alikassa;
+use App\Http\Services\PaymentGateways\Antilopay;
 use App\Http\Services\Token;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -42,49 +43,8 @@ class PaymentController extends Controller {
                     ]
                 );
 
-                $body = [
-                    'project_identificator' => config('antilopay.id'),
-                    'amount' =>  round($request->amount, 2),
-                    'order_id' => $request->invoice_id,
-                    'currency' => $request->currency,
-                    'product_name' => $request->description,
-                    'product_type' => 'goods',
-                    'product_type' => 1,
-                    'description' => 'Оплата заказа №' . $request->invoice_id,
-                    'customer' => [
-                        'email' => $request->email
-                    ],
-                    'prefer_methods' => [config('antilopay.payment_id')[$request->payment_id]],
-                    'success_url' => urldecode($request->return_url)
-                ];
-
-                $body = json_encode($body, JSON_UNESCAPED_UNICODE);
-                $secretKey = "-----BEGIN RSA PRIVATE KEY-----\n";
-                $secretKey .= config('antilopay.secret_key');
-                $secretKey .= "\n-----END RSA PRIVATE KEY-----";
-
-                $rawSignature = '';
-
-                openssl_sign($body, $rawSignature, $secretKey, OPENSSL_ALGO_SHA256);
-
-                $signature = base64_encode($rawSignature);
-
-                $headers = [
-                    'X-Apay-Secret-Id' => config('antilopay.secret_id'),
-                    'X-Apay-Sign-Version' => config('antilopay.api_version'),
-                    'X-Apay-Sign' => $signature
-                ];
-
-                $response = Http::withHeaders($headers)->withBody($body)->post(config('antilopay.uri') . 'create');
-
-                if (null !== $response->json('payment_url')) {
-                    Log::info('УСПЕХ. Оплата через антилопу.', [$response->json()]);
-
-                    return redirect()->to($response->json('payment_url'));
-                }
-                Log::info('ОШИБКА. Оплата через антилопу.', [$response->json()]);
-
-                return response()->json($response->json());
+                $antilopay = new Antilopay();
+                return redirect()->to($antilopay->getPaymentLink($request));
             } elseif (isset(config('alikassa.service')[$request->payment_id])) {
                 Order::firstOrCreate(
                     ['invoice_id' => $request->invoice_id],
@@ -104,7 +64,7 @@ class PaymentController extends Controller {
 
                 $alikassa = new Alikassa();
 
-                return redirect()->to($alikassa->paymentLink($request));
+                return redirect()->to($alikassa->getPaymentLink($request));
             } else {
                 return view('sellergames', ['request' => $request->all()]);
             }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class Alikassa {
     const DIGISELLER_API_CALLBACK_URI = 'https://digiseller.market/callback/api';
 
-    public function paymentLink($data) {
+    public function getPaymentLink($data) {
         $body = [
             'amount' => round($data->amount, 2),
             'order_id' => (string) $data->invoice_id,
@@ -41,7 +41,7 @@ class Alikassa {
         ])->withBody($body)->post('https://api-merchant.alikassa.com/v1/payment');
 
         if (null !== $response->json('url')) {
-            Log::info('УСПЕХ. Оплата через Alikassa.', [$response->json()]);
+            Log::info('Оплата через Alikassa.', [$response->json()]);
             return $response->json('url');
         }
 
