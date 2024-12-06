@@ -127,7 +127,7 @@ class PaymentController extends Controller {
             };
 
             Order::where('invoice_id', $request->order_id)
-                ->where('amount', $request->original_amount)
+                ->where('status', 'N')
                 ->update([
                     'status' => 'P',
                     'customer_ip' => $request->customer_ip,
