@@ -22,7 +22,7 @@ class Feedback {
             ]
         )->get('{+endpoint}/{invoice_id}?token={token}');
 
-        if ($response->json('content')['feedback'] != null) {
+        if (isset($response['content']['feedback'])) {
             $notification = Notification::where('invoice_id', $invoice_id)
                 ->first();
             $notification->delete();

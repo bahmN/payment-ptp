@@ -2,7 +2,6 @@
 
 namespace App\Http\Services;
 
-use App\Models\Notification as ModelsNotification;
 use App\Models\OptionNotification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -67,21 +66,23 @@ class Notification {
             ]
         )->get('{+endpoint}?token={token}&id_i={id_i}');
 
+        $sendMessage = true; // TODO: ПОМЕНЯТЬ НА FALSE после того как решится проблема с запросами
 
         if (empty($response->json())) {
-            return true;
+            $sendMessage = true;
         }
 
-        $message = $response->json();
-
-        if (isset($message['buyer']) && $message['buyer']) {
-            if (isset($message['date_seen']) && $message['date_seen']) {
-                return true;
+        foreach ($response->json() as $m) {
+            if (
+                isset($m['buyer'])
+                && $m['buyer']
+                && isset($m['date_seen'])
+                && $m['date_seen']
+            ) {
+                $sendMessage = true;
             }
-
-            return false;
         }
 
-        return true;
+        return $sendMessage;
     }
 }

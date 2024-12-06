@@ -71,7 +71,7 @@ class Alikassa {
 
             if ($verify) {
                 Order::where('invoice_id', $request->order_id)
-                    ->where('amount', round($request->original_amount, 2))
+                    ->where('status', 'N')
                     ->update([
                         'status' => 'P',
                         'operation_id' => $request->id
