@@ -46,6 +46,29 @@ class PaymentController extends Controller {
                 $antilopay = new Antilopay();
                 return redirect()->to($antilopay->getPaymentLink($request));
             } elseif (isset(config('alikassa.service')[$request->payment_id])) {
+
+                // Если заказ меньше 500 рублей, то выводим оплату на Антилопе
+                if (round($request->amount, 2) < 500) {
+                    Order::firstOrCreate(
+                        ['invoice_id' => $request->invoice_id],
+                        [
+                            'amount' => round($request->amount, 2),
+                            'currency' => $request->currency,
+                            'description' => $request->description,
+                            'lang' => $request->lang,
+                            'email' => $request->email,
+                            'payment_id' => 20212,
+                            'return_url' => urldecode($request->return_url),
+                            'status' => 'N',
+                            'date' => date('Y-m-d H:i:s')
+                        ]
+                    );
+
+                    $request['payment_id'] = 20212;
+                    $antilopay = new Antilopay();
+                    return redirect()->to($antilopay->getPaymentLink($request));
+                }
+
                 Order::firstOrCreate(
                     ['invoice_id' => $request->invoice_id],
                     [
@@ -174,7 +197,7 @@ class PaymentController extends Controller {
     protected function checkAmount($request) {
         $token = new Token(0);
 
-        $order = Http::get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token->get());
+        $order = Http::retry(3, 3000)->get("https://api.digiseller.com/api/purchase/info/{$request->invoice_id}?token=" . $token->get());
 
         if (
             !isset($order['content']['amount']) ||

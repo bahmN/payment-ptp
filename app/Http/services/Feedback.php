@@ -14,7 +14,7 @@ class Feedback {
     }
 
     public function check($invoice_id) {
-        $response = Http::withHeader('Accept', 'application/json')->withUrlParameters(
+        $response = Http::retry(3, 3000)->withHeader('Accept', 'application/json')->withUrlParameters(
             [
                 'endpoint' => 'https://api.digiseller.com/api/purchase/info',
                 'invoice_id' => $invoice_id,

@@ -3,14 +3,22 @@
         20212 => [
             'title' => 'СБП',
             'pathIcon' => 'img/paymentMethods/logo_sbp.svg',
+            'paymentGateway' => 'Antilopay',
         ],
         20216 => [
             'title' => 'СберПей',
             'pathIcon' => 'img/paymentMethods/logo_sber.svg',
+            'paymentGateway' => 'Antilopay',
         ],
         20301 => [
             'title' => 'Банковская карта',
             'pathIcon' => 'img/paymentMethods/logo_bankC.png',
+            'paymentGateway' => 'Antilopay',
+        ],
+        20578 => [
+            'title' => 'СБП',
+            'pathIcon' => 'img/paymentMethods/logo_sbp.svg',
+            'paymentGateway' => 'Alikassa',
         ],
     ];
 
@@ -51,7 +59,7 @@
                 </div>
                 <div class="data_method-groupe--info">
                     <h3 class="data_method-title">{{ $dataMethod[$order->payment_id]['title'] }}</h3>
-                    <h5 class="data_method-gateway">Antilopay</h5>
+                    <h5 class="data_method-gateway">{{ $dataMethod[$order->payment_id]['paymentGateway'] }}</h5>
                 </div>
             </div>
 
