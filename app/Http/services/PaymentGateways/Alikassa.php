@@ -51,7 +51,7 @@ class Alikassa {
     }
 
     public function callback(Request $request) {
-        if (isset($request->payment_status) ?? $request->payment_status == 'paid') {
+        if (isset($request->payment_status) && $request->payment_status == 'paid') {
             $verify = openssl_verify(
                 json_encode([
                     'type' => $request->type,

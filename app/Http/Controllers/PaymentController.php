@@ -96,58 +96,6 @@ class PaymentController extends Controller {
         }
     }
 
-    public function antilopayCallback(Request $request) {
-        if (isset($request->status) && $request->status == 'SUCCESS') {
-            $sign = $request->header('X-Apay-Callback');
-            $publicKey = "-----BEGIN PUBLIC KEY-----\n" . config('antilopay.callback_key') . "\n-----END PUBLIC KEY-----";
-            $jsonData = file_get_contents('php://input');
-            $rawSign = base64_decode($sign);
-
-            if (openssl_verify($jsonData, $rawSign, $publicKey, OPENSSL_ALGO_SHA256) != 1) {
-                Log::error('Antilopay Callback. НЕПРАВИЛЬНАЯ СИГНАТУРА', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all()]);
-
-                return response()->json(['Wrong signature'], 403);
-            };
-
-            Order::where('invoice_id', $request->order_id)
-                ->where('status', 'N')
-                ->update([
-                    'status' => 'P',
-                    'customer_ip' => $request->customer_ip,
-                    'operation_id' => $request->payment_id
-                ]);
-
-            $signData = [
-                'invoice_id' => $request->order_id,
-                'amount' =>  number_format($request->amount, 2, '.', ''),
-                'currency' => 'RUB',
-                'status' => 'paid'
-            ];
-
-            ksort($signData);
-
-            $stringToSign = '';
-            foreach ($signData as $key => $value) {
-                $stringToSign .= "$key:$value;";
-            }
-
-            $signature = hash_hmac('SHA256', $stringToSign, config('digiseller.callback_key'), false);
-
-            $body = [
-                'invoice_id' => $request->order_id,
-                'amount' =>  number_format($request->amount, 2, '.', ''),
-                'currency' => 'RUB',
-                'status' => 'paid',
-                'signature' => strtoupper($signature),
-            ];
-
-            $response = Http::asForm()->get(self::DIGISELLER_API_CALLBACK_URI, $body);
-            Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
-        }
-
-        return response()->json('Bad request', 400);
-    }
-
     public function digisellerCallback(Request $request) {
         if ($request->has('invoice_id', 'seller_id', 'amount')) {
 
