@@ -44,7 +44,7 @@ class Antilopay {
             'X-Apay-Sign' => $signature
         ];
 
-        $response = Http::withHeaders($headers)->withBody($body)->post(config('antilopay.uri') . 'create');
+        $response = Http::retry(3, 3000)->withHeaders($headers)->withBody($body)->post(config('antilopay.uri') . 'create');
 
         if (null !== $response->json('payment_url')) {
             Log::info('Оплата через Antilopay.', [$response->json()]);
@@ -105,6 +105,6 @@ class Antilopay {
             Log::info('Antilopay Callback.', ['ПАРАМЕТРЫ АНТИЛОПЫ' => $request->all(), 'Ответ дигги' => $response->body()]);
         }
 
-        return response()->json('Bad request', 400);
+        return response()->json('Bad request', 200);
     }
 }

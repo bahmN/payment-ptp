@@ -35,7 +35,7 @@ class Alikassa {
         openssl_sign($body, $sign, $privateKey);
         $sign = base64_encode($sign);
 
-        $response = Http::withHeaders([
+        $response = Http::retry(3, 3000)->withHeaders([
             'Account' => config('alikassa.account_id'),
             'Sign' => $sign
         ])->withBody($body)->post('https://api-merchant.alikassa.com/v1/payment');
@@ -108,9 +108,9 @@ class Alikassa {
                 return response()->json('200', 200);
             }
 
-            return response()->json('Bad signature', 400);
+            return response()->json('Bad signature', 200);
         }
 
-        return response()->json('Bad status', 400);
+        return response()->json('Bad status', 200);
     }
 }

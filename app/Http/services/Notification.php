@@ -25,7 +25,7 @@ class Notification {
             ];
 
             if (isset($optionsNotify->uri_picture)) {
-                $uploadPict = Http::withHeaders([
+                $uploadPict = Http::retry(3, 3000)->withHeaders([
                     'Accept' => 'application/json'
                 ])
                     ->attach('photo', file_get_contents($optionsNotify->uri_picture), 'feedback.png',  ['Content-Type' => 'image/jpeg'])
