@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\Token as ModelsToken;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Token {
     private $token;
@@ -28,9 +29,17 @@ class Token {
                 'sign' =>  hash('sha256', $this->digisellerKey . $timestamp)
             ]);
 
-            $token->id = $response['token'];
-            $token->end_life = strtotime($response['valid_thru']);
-            $token->save();
+            if ($response['token']) {
+                $token->id = $response['token'];
+                $token->end_life = strtotime($response['valid_thru']);
+                $token->save();
+
+                return $token->id;
+            }
+
+            Log::error('Ошибка генерации токена.', [$response]);
+
+            return response()->json('Ошибка генерации токена');
         }
 
         return $token->id;
