@@ -25,13 +25,15 @@ class Notification {
             ];
 
             if (isset($optionsNotify->uri_picture)) {
-                $uploadPict = Http::retry(3, 3000)->withHeaders([
+                $uploadPict = Http::retry(3, 3000)->timeout(45)->withHeaders([
                     'Accept' => 'application/json'
                 ])
                     ->attach('photo', file_get_contents($optionsNotify->uri_picture), 'feedback.png',  ['Content-Type' => 'image/jpeg'])
                     ->post("https://api.digiseller.com/api/debates/v2/upload-preview?token={$this->token}&lang=ru-RU");
 
                 if ($uploadPict->ok()) {
+                    Log::error('Предзагрузка фотографии. УСПЕХ.', ['uploadPict' => $uploadPict->json()]);
+
                     $body['files'] = [
                         [
                             'newid' => $uploadPict->json('files')[0]['newid'],
@@ -48,11 +50,15 @@ class Notification {
                 ->withBody(json_encode($body, JSON_UNESCAPED_UNICODE))
                 ->post('https://api.digiseller.com/api/debates/v2/?token=' . $this->token . '&id_i=' . $id_i);
 
+
             if ($response->ok()) {
+                Log::error('Отправка уведомления. УСПЕХ.', ['invoice_id' => $id_i]);
+
                 return 'ok';
             } else {
-                return $response->json();
                 Log::error('Отправка уведомления. ОШИБКА.', ['Response: ' => $response->json()]);
+
+                return $response->json();
             }
         }
     }

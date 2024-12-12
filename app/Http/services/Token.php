@@ -20,7 +20,7 @@ class Token {
         $timestamp = time();
 
         if ($token->end_life < $timestamp) {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 3000)->withHeaders([
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
             ])->post('https://api.digiseller.com/api/apilogin', [
@@ -29,7 +29,7 @@ class Token {
                 'sign' =>  hash('sha256', $this->digisellerKey . $timestamp)
             ]);
 
-            if ($response['token']) {
+            if (isset($response['token']) && $response['token']) {
                 $token->id = $response['token'];
                 $token->end_life = strtotime($response['valid_thru']);
                 $token->save();
