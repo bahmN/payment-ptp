@@ -32,7 +32,7 @@ class Notification {
                     ->post("https://api.digiseller.com/api/debates/v2/upload-preview?token={$this->token}&lang=ru-RU");
 
                 if ($uploadPict->ok()) {
-                    Log::error('Предзагрузка фотографии. УСПЕХ.', ['uploadPict' => $uploadPict->json()]);
+                    Log::info('Предзагрузка фотографии. УСПЕХ.', ['uploadPict' => $uploadPict->json()]);
 
                     $body['files'] = [
                         [
@@ -52,7 +52,7 @@ class Notification {
 
 
             if ($response->ok()) {
-                Log::error('Отправка уведомления. УСПЕХ.', ['invoice_id' => $id_i]);
+                Log::info('Отправка уведомления. УСПЕХ.', ['invoice_id' => $id_i]);
 
                 return 'ok';
             } else {

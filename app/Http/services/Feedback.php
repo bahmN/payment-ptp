@@ -3,7 +3,9 @@
 namespace App\Http\Services;
 
 use App\Models\Notification;
+use Exception;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Feedback {
     private $token;
@@ -23,10 +25,14 @@ class Feedback {
         )->get('{+endpoint}/{invoice_id}?token={token}');
 
         if (isset($response['content']['feedback'])) {
-            $notification = Notification::where('invoice_id', $invoice_id)
-                ->first();
-            $notification->delete();
-            return true;
+            try {
+                $notification = Notification::where('invoice_id', $invoice_id)
+                    ->first();
+                $notification->delete();
+                return true;
+            } catch (Exception $e) {
+                Log::error('Ошибка удаления записи в Notification. Feedback Service', ['invoice_id' => $invoice_id, $e]);
+            }
         }
 
         return false;
